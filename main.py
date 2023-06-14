@@ -1,4 +1,4 @@
-from predict_model import model
+import joblib
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from states import States
 from aiogram.dispatcher.filters import Text
@@ -11,8 +11,15 @@ from aiogram import Bot, Dispatcher, types, executor
 bot = Bot(token='5846028312:AAEipW2L_pJ7XgSM9Q7BPcTD7FWQXn87SWI')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+model = joblib.load('result_model.joblib')
 
 @dp.message_handler(commands=['start'])
+async def start(message: types.Message):
+    await message.answer("Привет👋")
+    await message.answer("Чтобы начать пользоваться ботом, введите - /commands")
+
+
+@dp.message_handler(commands=['commands'])
 async def start(message: types.Message):
     inline_keyboard = types.InlineKeyboardMarkup()
 
@@ -22,11 +29,8 @@ async def start(message: types.Message):
     ]
     inline_keyboard.add(*buttons)
 
-    await message.answer("Привет👋")
     await message.answer("Я помогу тебе узнать примерную цену желаемой квартиры")
     await message.answer("Выбери действие:", reply_markup=inline_keyboard)
-
-
 
 
 @dp.callback_query_handler(text="predict")
@@ -186,6 +190,8 @@ async def get_hot_water(message: Message, state: FSMContext):
                          f"Тип: {type}\n"
                          f"Горячая вода: {water}\n")
     await bot.send_message(message.from_user.id, f"Примерная стоимость квартиры:\n{int(round(result[0][0], 0))} рублей💰💰💰")
+    await message.answer("Попробовать ещё раз - /commands")
+
 
 
 
